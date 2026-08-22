@@ -265,6 +265,64 @@ class ApiClient {
       body: JSON.stringify({ sender_phone: senderPhone, message_body: messageBody }),
     });
   }
+
+  // Triage Module
+  async submitTriage(data: {
+    patient_name: string;
+    patient_age: number;
+    abha_id?: string;
+    danger_signs: string;
+    fever: boolean;
+    chronic_flags: string;
+    recommendation: string;
+  }) {
+    return this.request<any>('/triage/submit', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getTriageEncounters(abhaId?: string) {
+    const url = abhaId ? `/triage?abha_id=${abhaId}` : '/triage';
+    return this.request<any[]>(url);
+  }
+
+  // Follow-Ups
+  async getFollowUps(status?: string) {
+    const url = status ? `/followups?status=${status}` : '/followups';
+    return this.request<any[]>(url);
+  }
+
+  async scheduleFollowUp(data: { patient_name: string; category: string; abha_id?: string }) {
+    const query = new URLSearchParams();
+    query.set('patient_name', data.patient_name);
+    query.set('category', data.category);
+    if (data.abha_id) query.set('abha_id', data.abha_id);
+    return this.request<any>(`/followups/schedule?${query.toString()}`, {
+      method: 'POST',
+    });
+  }
+
+  async completeFollowUp(id: number) {
+    return this.request<any>(`/followups/${id}/complete`, {
+      method: 'POST',
+    });
+  }
+
+  // Referral Status State Machine
+  async updateReferralStatus(id: number, status: string) {
+    return this.request<any>(`/referrals/${id}/status?status=${status}`, {
+      method: 'POST',
+    });
+  }
+
+  // IVR System Call
+  async queryIVR(language: string, digitsPressed: string) {
+    return this.request<any>('/ivr/call', {
+      method: 'POST',
+      body: JSON.stringify({ language, digits_pressed: digitsPressed }),
+    });
+  }
 }
 
 export const api = new ApiClient();

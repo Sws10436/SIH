@@ -13,13 +13,14 @@ import { IoTMonitorPage } from './pages/IoTMonitorPage';
 import { AuditTrailPage } from './pages/AuditTrailPage';
 import { ABDMAdapterPage } from './pages/ABDMAdapterPage';
 import { UserRegistryPage } from './pages/UserRegistryPage';
+import { FrontlinePortalPage } from './pages/FrontlinePortalPage';
 import { api, createWebSocketSubscriber } from './api/client';
 
 // Strict Role-Based Access Control mapping
 const ROLE_ALLOWED_TABS: Record<UserRole, string[]> = {
-  PATIENT: ['patient-search', 'patient-referral', 'login'],
-  HOSPITAL_STAFF: ['hospital-dashboard', 'clinical-turnover', 'abdm-hub', 'login'],
-  GOVT_ADMIN: ['govt-overview', 'digital-twin', 'iot-monitor', 'audit-trail', 'user-registry', 'login'],
+  PATIENT: ['patient-search', 'patient-referral', 'frontline-portal', 'login'],
+  HOSPITAL_STAFF: ['hospital-dashboard', 'clinical-turnover', 'abdm-hub', 'frontline-portal', 'login'],
+  GOVT_ADMIN: ['govt-overview', 'digital-twin', 'iot-monitor', 'audit-trail', 'user-registry', 'frontline-portal', 'login'],
 };
 
 const ROLE_DEFAULT_TAB: Record<UserRole, string> = {
@@ -178,6 +179,7 @@ export function App() {
         {isTabPermitted && activeTab === 'iot-monitor' && <IoTMonitorPage />}
         {isTabPermitted && activeTab === 'audit-trail' && <AuditTrailPage />}
         {isTabPermitted && activeTab === 'user-registry' && <UserRegistryPage />}
+        {isTabPermitted && activeTab === 'frontline-portal' && <FrontlinePortalPage />}
       </main>
 
       {/* Real-time WebSocket Toasts */}

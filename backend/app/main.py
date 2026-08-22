@@ -18,6 +18,9 @@ from app.routes.iot import router as iot_router
 from app.routes.audit import router as audit_router
 from app.routes.abdm import router as abdm_router
 from app.routes.rural_access import router as rural_router
+from app.routes.triage import router as triage_router
+from app.routes.followup import router as followup_router
+from app.routes.ivr import router as ivr_router
 from app.routes.ws import ws_router
 
 @asynccontextmanager
@@ -57,6 +60,9 @@ app.include_router(iot_router, prefix=settings.API_V1_STR)
 app.include_router(audit_router, prefix=settings.API_V1_STR)
 app.include_router(abdm_router, prefix=settings.API_V1_STR)
 app.include_router(rural_router, prefix=settings.API_V1_STR)
+app.include_router(triage_router, prefix=settings.API_V1_STR)
+app.include_router(followup_router, prefix=settings.API_V1_STR)
+app.include_router(ivr_router, prefix=settings.API_V1_STR)
 app.include_router(ws_router) # WebSocket at /ws/live
 
 @app.get("/")

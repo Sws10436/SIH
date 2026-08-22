@@ -270,6 +270,7 @@ class HospitalReferralScore(BaseModel):
 class ReferralRequestCreate(BaseModel):
     patient_name: str
     patient_age: int
+    abha_id: Optional[str] = None
     required_specialty: str
     required_bed_type: str = "ICU"
     originating_lat: float
@@ -282,6 +283,7 @@ class ReferralResponse(BaseModel):
     id: int
     patient_name: str
     patient_age: int
+    abha_id: Optional[str] = None
     required_specialty: str
     required_bed_type: str
     destination_hospital_id: int
@@ -289,7 +291,47 @@ class ReferralResponse(BaseModel):
     status: str
     urgency_level: str
     created_at: datetime.datetime
+    updated_at: datetime.datetime
     ambulance: Optional[dict] = None
+
+# ----------------- TRIAGE & FOLLOW-UP SCHEMAS -----------------
+class TriageEncounterCreate(BaseModel):
+    patient_name: str
+    patient_age: int
+    abha_id: Optional[str] = None
+    danger_signs: str  # JSON string
+    fever: bool = False
+    chronic_flags: str  # JSON string
+    recommendation: str  # REFER, OBSERVE, TREAT
+
+class TriageEncounterResponse(BaseModel):
+    id: int
+    patient_name: str
+    patient_age: int
+    abha_id: Optional[str] = None
+    danger_signs: str
+    fever: bool
+    chronic_flags: str
+    recommendation: str
+    created_at: datetime.datetime
+
+class FollowUpResponse(BaseModel):
+    id: int
+    patient_name: str
+    abha_id: Optional[str] = None
+    category: str
+    follow_up_date: datetime.datetime
+    status: str
+    created_at: datetime.datetime
+
+class IVRCallRequest(BaseModel):
+    language: str # mr (Marathi), hi (Hindi), en (English)
+    digits_pressed: Optional[str] = ""
+
+class IVRCallResponse(BaseModel):
+    prompt_text: str
+    should_hangup: bool
+    allowed_digits: List[str]
 
 class AmbulanceResponse(BaseModel):
     id: int

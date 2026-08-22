@@ -217,18 +217,44 @@ class ReferralRequest(Base):
     id = Column(Integer, primary_key=True, index=True)
     patient_name = Column(String(120), nullable=False)
     patient_age = Column(Integer, default=45)
+    abha_id = Column(String(50), nullable=True)
     required_specialty = Column(String(100), nullable=False)
     required_bed_type = Column(String(50), default=BedType.ICU)
     originating_lat = Column(Float, nullable=False)
     originating_lng = Column(Float, nullable=False)
     destination_hospital_id = Column(Integer, ForeignKey("hospitals.id"), nullable=True)
-    status = Column(String(30), default="REQUESTED") # REQUESTED, DISPATCHED, ADMITTED, REJECTED, CANCELLED
+    status = Column(String(30), default="created") # created, in_transit, arrived, treated, closed, overdue, lost
     urgency_level = Column(String(20), default="HIGH") # NORMAL, HIGH, CRITICAL
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     destination_hospital = relationship("Hospital")
     ambulance = relationship("Ambulance", back_populates="active_referral", uselist=False)
+
+class TriageEncounter(Base):
+    __tablename__ = "triage_encounters"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_name = Column(String(120), nullable=False)
+    patient_age = Column(Integer, nullable=False)
+    abha_id = Column(String(50), nullable=True)
+    danger_signs = Column(Text, nullable=True) # JSON string representation
+    fever = Column(Boolean, default=False)
+    chronic_flags = Column(Text, nullable=True) # JSON string representation
+    recommendation = Column(String(30), nullable=False) # REFER, OBSERVE, TREAT
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class FollowUp(Base):
+    __tablename__ = "follow_ups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    patient_name = Column(String(120), nullable=False)
+    abha_id = Column(String(50), nullable=True)
+    category = Column(String(30), nullable=False) # MATERNAL, CHILD, CHRONIC
+    follow_up_date = Column(DateTime, nullable=False)
+    status = Column(String(30), default="PENDING") # PENDING, MISSED, COMPLETED
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class DistrictAlert(Base):
     __tablename__ = "district_alerts"

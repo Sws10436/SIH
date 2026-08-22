@@ -141,6 +141,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </>
           )}
 
+          {/* Frontline Worker Portal Launcher */}
+          <button
+            className={`nav-item ${activeTab === 'frontline-portal' ? 'active' : ''}`}
+            onClick={() => onTabChange('frontline-portal')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Users size={16} /> Frontline Worker
+          </button>
+
           {/* Rural USSD / SMS Simulator Launcher */}
           <button
             onClick={onOpenUssd}

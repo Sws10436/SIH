@@ -38,9 +38,27 @@ export const HospitalPortal: React.FC = () => {
   const [editO2Tank, setEditO2Tank] = useState<number>(16);
   const [editDCyl, setEditDCyl] = useState<number>(50);
 
+  // ABHA Lookup state
+  const [abhaSearch, setAbhaSearch] = useState<string>('');
+  const [triageHistory, setTriageHistory] = useState<any[]>([]);
+  const [isSearchingAbha, setIsSearchingAbha] = useState<boolean>(false);
+
   // Batch toggle mode (Non-HMS Fallback)
   const [batchMode, setBatchMode] = useState<boolean>(false);
   const [selectedBedIds, setSelectedBedIds] = useState<number[]>([]);
+
+  const handleAbhaLookup = async () => {
+    if (!abhaSearch) return;
+    setIsSearchingAbha(true);
+    try {
+      const data = await api.getTriageEncounters(abhaSearch);
+      setTriageHistory(data);
+    } catch (e: any) {
+      alert('ABHA Lookup failed: ' + e.message);
+    } finally {
+      setIsSearchingAbha(false);
+    }
+  };
 
   useEffect(() => {
     loadHospitalList();
@@ -691,6 +709,80 @@ export const HospitalPortal: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ABHA Longitudinal Health Record Lookup */}
+      <div className="card" style={{ marginTop: '24px' }}>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+          📑 Longitudinal Health Record Alignment (ABDM / ABHA Sandbox)
+        </h3>
+        <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '14px' }}>
+          Query a patient's universal ABHA ID to retrieve their cross-tier clinical history, including frontline ASHA/ANM triage checkpoints, prior clinic logs, and hospital visits.
+        </p>
+
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', maxWidth: '500px' }}>
+          <input
+            type="text"
+            value={abhaSearch}
+            onChange={(e) => setAbhaSearch(e.target.value)}
+            placeholder="Enter Patient ABHA ID (e.g. 1111-2222-3333-4444)"
+            className="form-input"
+            style={{ flex: 1 }}
+          />
+          <button
+            onClick={handleAbhaLookup}
+            disabled={isSearchingAbha}
+            className="btn btn-primary"
+          >
+            {isSearchingAbha ? 'Fetching...' : 'Query ABHA Records'}
+          </button>
+        </div>
+
+        {triageHistory.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#475569' }}>
+              Historical Encounters Found ({triageHistory.length}):
+            </h4>
+            {triageHistory.map((encounter) => (
+              <div
+                key={encounter.id}
+                style={{
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '12px',
+                  background: '#f8fafc'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1e293b' }}>
+                    Frontline Triage Checkpoint — Encounter #{encounter.id}
+                  </span>
+                  <span style={{
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    background: encounter.recommendation === 'REFER' ? '#fee2e2' : '#e0f2fe',
+                    color: encounter.recommendation === 'REFER' ? '#ef4444' : '#0284c7',
+                    padding: '2px 8px',
+                    borderRadius: '6px'
+                  }}>
+                    Recommendation: {encounter.recommendation}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div><strong>Patient:</strong> {encounter.patient_name} ({encounter.patient_age} years)</div>
+                  <div><strong>Fever:</strong> {encounter.fever ? 'Yes' : 'No'}</div>
+                  <div><strong>Danger Signs Checked:</strong> {encounter.danger_signs}</div>
+                  <div><strong>Chronic Flags Checked:</strong> {encounter.chronic_flags}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '4px' }}>
+                    Timestamp: {new Date(encounter.created_at).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : abhaSearch && !isSearchingAbha ? (
+          <p style={{ fontSize: '0.82rem', color: '#64748b' }}>No clinical history records found for this ABHA ID.</p>
+        ) : null}
       </div>
     </div>
   );
